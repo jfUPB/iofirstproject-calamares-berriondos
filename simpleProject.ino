@@ -10,15 +10,15 @@ void task1()
 
     // Definición de variables static (conservan
     // su valor entre llamadas a task1)
-    static uint32_t lasTime = 0;
+    static uint8_t btn1StateOld = LOW;
+    static uint8_t btn2StateOld =  LOW;
+
 
     // Constantes
 
     constexpr uint32_t INTERVAL = 1000;
     constexpr uint8_t button1Pin = 12;
     constexpr uint8_t button2Pin = 13;
-    constexpr uint8_t button3Pin = 32;
-    constexpr uint8_t button4Pin = 33;
     constexpr uint8_t ledRed = 14;
     constexpr uint8_t ledGreen = 25;
     constexpr uint8_t ledBlue = 26;
@@ -33,13 +33,10 @@ void task1()
         Serial.begin(115200);
         pinMode(button1Pin, INPUT_PULLUP);
         pinMode(button2Pin, INPUT_PULLUP);
-        pinMode(button3Pin, INPUT_PULLUP);
-        pinMode(button4Pin, INPUT_PULLUP);
         pinMode(ledRed, OUTPUT);
         pinMode(ledGreen, OUTPUT);
         pinMode(ledBlue, OUTPUT);
         pinMode(ledYellow, OUTPUT);
-        lasTime = millis();
         task1State = Task1States::WAIT_TIMEOUT;
 
         break;
@@ -48,44 +45,47 @@ void task1()
     {
         uint8_t btn1State = digitalRead(button1Pin);
         uint8_t btn2State = digitalRead(button2Pin);
-        uint8_t btn3State = digitalRead(button3Pin);
-        uint8_t btn4State = digitalRead(button4Pin);
         uint32_t currentTime = millis();
 
-        // Evento 1:
-        if ((currentTime - lasTime) >= INTERVAL)
-        {
-            lasTime = currentTime;
-            printf("btn1: %d,btn2: %d, btn3: %d, btn4: %d\n", btn1State, btn2State, btn3State, btn4State);
+
+        if( (btn1State != btn1StateOld) || (btn2State != btn2StateOld) ){
+                    btn1StateOld = btn1State;
+                    btn2StateOld = btn2State;
+
+
+                    // Evento 2
+                    if ( (btn1State == LOW) && (btn2State == LOW)){
+                        digitalWrite(ledGreen, LOW);
+                        digitalWrite(ledBlue, LOW);
+                        digitalWrite(ledYellow, LOW);
+                        digitalWrite(ledRed, HIGH);
+                        printf("Red ON\n");
+                    }
+                    // Evento 3
+                    if ( (btn1State == LOW) && (btn2State == HIGH)){
+                        digitalWrite(ledGreen, HIGH);
+                        digitalWrite(ledBlue, LOW);
+                        digitalWrite(ledYellow, LOW);
+                        digitalWrite(ledRed, LOW);
+                        printf("Green ON\n");
+                    }
+                    if ( (btn1State == HIGH) && (btn2State == LOW)){
+                        digitalWrite(ledGreen, LOW);
+                        digitalWrite(ledBlue, HIGH);
+                        digitalWrite(ledYellow, LOW);
+                        digitalWrite(ledRed, LOW);
+                        printf("Blue ON\n");
+                    }
+                    if ( (btn1State == HIGH) && (btn2State == HIGH)){
+                        digitalWrite(ledGreen, LOW);
+                        digitalWrite(ledBlue, LOW);
+                        digitalWrite(ledYellow, HIGH);
+                        digitalWrite(ledRed, LOW);
+                        printf("Yellow ON\n");
+                    }
+
         }
-
-        // Evento 2
-        if (btn1State == LOW)
-            digitalWrite(ledRed, HIGH);
-        // Evento 3
-        if (btn2State == LOW)
-            digitalWrite(ledGreen, HIGH);
-        // Evento 4
-        if (btn3State == LOW)
-            digitalWrite(ledBlue, HIGH);
-        // Evento 5
-        if (btn4State == LOW)
-            digitalWrite(ledYellow, HIGH);
-
-            // Evento 2
-        if (btn1State == HIGH)
-            digitalWrite(ledRed, LOW);
-        // Evento 3
-        if (btn2State == HIGH)
-            digitalWrite(ledGreen, LOW);
-        // Evento 4
-        if (btn3State == HIGH)
-            digitalWrite(ledBlue, LOW);
-        // Evento 5
-        if (btn4State == HIGH)
-            digitalWrite(ledYellow, LOW);
-
-
+        
         break;
     }
     default:
